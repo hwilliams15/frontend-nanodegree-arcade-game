@@ -1,6 +1,8 @@
 frontend-nanodegree-arcade-game
 ===============================
 
-Students should use this [rubric](https://www.udacity.com/course/viewer/#!/c-nd001/l-2696458597/m-2687128535) for self-checking their submission.
+Open index.html in your web browser to start the game.
 
-For detailed instructions on how to get started, check out this [guide](https://docs.google.com/document/d/1v01aScPjSWCCWQLIpFqvg3-vXLH2e8_SZQKC8jNO0Dc/pub?embedded=true).
+Bugs will cross the screen at various speeds. The objective is to move the player from the bottom of the screen to the water. Every collision with a bug is counted as a loss. Every time you reach the water is considered a win.
+
+Your wins and losses are recorded as you play.

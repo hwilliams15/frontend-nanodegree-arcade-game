@@ -1,4 +1,32 @@
-// Enemies our player must avoid
+//************************************
+//
+// Parent class GameEntity
+//
+//************************************
+var GameEntity = function(){
+
+};
+GameEntity.prototype.getXBlock = function(x){
+  return Math.floor(x/101);
+}
+GameEntity.prototype.getYBlock = function(y){
+  return Math.floor(y/83);
+}
+GameEntity.prototype.setPositionFromXYBlock = function(x,y){
+    this.x = x*101;
+    this.y = y*83;
+}
+
+//************************************
+//
+// End GameEntity class
+//
+//************************************
+//************************************
+//
+// Enemy class
+//
+//************************************
 var Enemy = function() {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
@@ -6,8 +34,12 @@ var Enemy = function() {
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
-    this.speed = 0;
+    this.width = 101;
+    this.height = 83;
+    this.setLocationAndSpeed();
 };
+Enemy.prototype = Object.create(GameEntity.prototype);
+Enemy.constructor = Enemy;
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
@@ -16,18 +48,97 @@ Enemy.prototype.update = function(dt) {
     // which will ensure the game runs at the same speed for
     // all computers.
     this.x = (this.x + this.speed * dt);
+    //after the bug goes off the screen reset its position
+    if(this.x > ctx.canvas.width){
+      this.setLocationAndSpeed();
+    }
+    if(this.collide(player)){
+      player.lose();
+    }
 };
-
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y-20);
+  //20 offset is to pull the bug up into the block
+  ctx.drawImage(Resources.get(this.sprite), this.x, this.y-20);
 };
+//Check if the enemy has collided with the player
+Enemy.prototype.collide = function(player){
 
-// Now write your own player class
+  var xBetween = false;
+  var yBetween = false;
+  //enemy start x between players x boundaries
+  if(this.x > player.x && this.x < player.x+player.width){
+    xBetween = true;
+  }
+  //player start x between enemies boundaries
+  //50 offset is for head of bug to cross player
+  if(player.x > this.x -50 && player.x < this.x+this.width-50){
+    xBetween = true;
+  }
+  if(player.x == this.x){
+    xBetween = true;
+  }
+  //enemy start y between players y boundaries
+  if(this.y > player.y && this.y < (player.y+player.height)){
+    yBetween = true;
+  }
+  //player start y between enemy boundaries
+  if(player.y > this.y && player.y < (this.y + this.height)){
+    yBetween = true;
+  }
+  if(this.y == player.y){
+    yBetween = true;
+  }
+  if(xBetween && yBetween){
+    return true;
+  }else{
+    return false;
+  }
+}
+//set the start location and speed
+Enemy.prototype.setLocationAndSpeed = function(){
+  var randomNum = Math.random();
+  var whichStoneRow = Math.floor(randomNum*(3))+1;
+  this.setPositionFromXYBlock(0,whichStoneRow);
+
+  //subtract from the x position to create a delay before entering
+  delay = (Math.floor(randomNum * 5) + 1)*100;
+  this.x = this.x- delay;
+
+  //slow
+  if(randomNum < 0.1){
+    this.speed = 200;
+  }
+  //fast
+  else if(randomNum > 0.7){
+    this.speed = 500;
+  }
+  //average
+  else{
+    this.speed = 300;
+  }
+}
+//************************************
+//
+// End Enemy class
+//
+//************************************
+
+//************************************
+//
+// Player class
+//
+//************************************
 var Player = function(){
   this.sprite = 'images/char-boy.png';
-  setPositionFromXYBlock(this,2,5);
+  this.setPositionFromXYBlock(2,5);
+  this.width = 101;
+  this.height = 83;
+  this.wins = 0;
+  this.losses = 0;
 };
+Player.prototype = Object.create(GameEntity.prototype);
+Player.constructor = Player;
 // This class requires an update(), render() and
 // a handleInput() method.
 Player.prototype.update = function(){
@@ -35,10 +146,12 @@ Player.prototype.update = function(){
 };
 
 Player.prototype.render = function(){
-
+  //40 offset is to center the player in the block
   ctx.drawImage(Resources.get(this.sprite), this.x, this.y-40);
 };
-
+Player.prototype.resetPosition = function(){
+  this.setPositionFromXYBlock(2,5);
+}
 Player.prototype.handleInput = function(input){
   var newX;
   var newY;
@@ -54,85 +167,58 @@ Player.prototype.handleInput = function(input){
   if(input == 'right'){
     newX = this.x + 101;
   }
-  if(newX >= 0 && getXBlock(newX) >=0 && getXBlock(newX)<5){
+  //update x if the players horizontal move is within the left and right bounds
+  //of the canvas
+  if(newX >= 0 && this.getXBlock(newX) >=0 && this.getXBlock(newX)<5){
     this.x = newX;
-  }if(newY >= 0 && getYBlock(newY) >0 && getYBlock(newY)<6){
+  }
+  //update y if the players vertical movement is above the grass and below
+  //the water
+  if(newY >= 0 && this.getYBlock(newY) >0 && this.getYBlock(newY)<6){
     this.y = newY;
   }
-  if(getYBlock(newY) == 0){//reset
-    setPositionFromXYBlock(this,2,5);
+  //if the player moves into the water the player has won
+  if(this.getYBlock(newY) == 0){//reset
+    this.win();
   }
-  //this.update();
 };
-function getXBlock(x){
-  return Math.floor(x/101);
+Player.prototype.win = function(){
+  this.wins++;
+  document.getElementById("wins").innerHTML = this.wins;
+  this.resetPosition();
 }
-function getYBlock(y){
-  return Math.floor(y/83);
+Player.prototype.lose = function(){
+  //reset the player
+  this.losses++;
+  document.getElementById("losses").innerHTML = this.losses;
+  this.resetPosition();
 }
-function getBlock(entity){
-  var xBlock = getXBlock(entity.x);
-  var yBlock = getYBlock(entity.y);
+//************************************
+//
+// End Player class
+//
+//************************************
 
-  return block = yBlock * 5 + xBlock;
-}
-function blockIsOccupied(block,enemies){
-  for(var i = 0; i < enemies.length;i++){
-    if(block == getBlock(enemies[i]));
-  }
-}
-function setPositionFromXYBlock(entity,x,y){
-    entity.x = x*101;
-    entity.y = y*83;
-}
-function setPositionFromBlock(entity,block){
-  var heightOfRow = 83;
-  var waterHeight = heightOfRow;
-  entity.x = (block % 5) * 101;
-  entity.y = Math.floor(block / 5) * heightOfRow + waterHeight;
-}
-function initializeAllEnemies(enemies){
+//************************************
+//
+// Setup player and enemies
+//
+//************************************
+var allEnemies = [ new Enemy(), new Enemy(), new Enemy()];
 
-  //find an unoccupied x
-  for(var i=0;i<enemies.length;i++){
-    var randomNum = Math.random();
-    var whichStoneRow = Math.floor(randomNum*(3));
-    while(blockIsOccupied(whichStoneRow,enemies)){
-      whichStoneRow++;
-      if(whichStoneRow>=3){
-        whichStoneRow = 0;
-        break;
-      }
-    }
-    setPositionFromBlock(enemies[i],whichStoneRow*5);
-
-    //slow
-    if(randomNum < 0.1){
-      enemies[i].speed = 200;
-    }
-    //fast
-    else if(randomNum > 0.9){
-      enemies[i].speed = 500;
-    }
-    //average
-    else{
-      enemies[i].speed = 300;
-    }
-  }
-
-}
-
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-var allEnemies = [ new Enemy(), new Enemy(), new Enemy];
 // Place the player object in a variable called player
 var player = new Player();
 
-initializeAllEnemies(allEnemies);
+//setup the enemies
+//for(var i=0;i<allEnemies.length;i++){
+//  allEnemies[i].setLocationAndSpeed();
+//}
 
-
-// This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
+//************************************
+//
+// Key listener
+//
+//************************************
 document.addEventListener('keyup', function(e) {
     var allowedKeys = {
         37: 'left',
@@ -143,3 +229,11 @@ document.addEventListener('keyup', function(e) {
 
     player.handleInput(allowedKeys[e.keyCode]);
 });
+document.addEventListener("keydown",
+    function(e){
+        switch(e.keyCode){
+            case 37: case 39: case 38:  case 40: // Arrow keys
+            case 32: e.preventDefault(); break; // Space
+            default: break; // do not block other keys
+        }
+    });

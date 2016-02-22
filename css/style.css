@@ -1,3 +1,18 @@
 body {
     text-align: center;
+    font-family:sans-serif;
+}
+.wins-span{
+  color: #080;
+}
+.losses-span{
+  color: #f00;
+}
+.game-summary{
+  display:flex;
+  justify-content: space-around;
+}
+#main{
+  width:500px;
+  margin: 0 auto;
 }
