@@ -1,52 +1,58 @@
-//************************************
-//
-// Parent class GameEntity
-//
-//************************************
+/**
+* Parent class GameEntity
+* @constructor
+*/
 var GameEntity = function() {
 
 };
+/**
+* Gets the x block of the grid based on the x position
+* @param {int} x - The x position in the canvas
+*/
 GameEntity.prototype.getXBlock = function(x) {
  return Math.floor(x / 101);
 };
+/**
+* Gets the y block of the grid based on the y position
+* @param {int} y - The y position in the canvas
+*/
 GameEntity.prototype.getYBlock = function(y) {
  return Math.floor(y / 83);
 };
+/**
+* Given the game blocks set the x and y position on the canvas
+* @param {int} x - The x block in the game
+* @param {int} y - The y block in the game
+*/
 GameEntity.prototype.setPositionFromXYBlock = function(x, y) {
  this.x = x * 101;
  this.y = y * 83;
 };
 
-//************************************
-//
-// End GameEntity class
-//
-//************************************
-//************************************
-//
-// Enemy class
-//
-//************************************
+/**
+* End GameEntity class
+*/
+/**
+* Enemy class
+* @constructor
+* @extends GameEntity
+*/
 var Enemy = function() {
- // Variables applied to each of our instances go here,
- // we've provided one for you to get started
-
- // The image/sprite for our enemies, this uses
- // a helper we've provided to easily load images
  this.sprite = 'images/enemy-bug.png';
  this.width = 101;
  this.height = 83;
  this.setLocationAndSpeed();
 };
+// Setting up the inheritance for Enemy
 Enemy.prototype = Object.create(GameEntity.prototype);
 Enemy.constructor = Enemy;
 
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
+/**
+* Update the enemy's position
+* @param dt - a time delta between ticks
+*/
 Enemy.prototype.update = function(dt) {
- // You should multiply any movement by the dt parameter
- // which will ensure the game runs at the same speed for
- // all computers.
+
  this.x = (this.x + this.speed * dt);
  //after the bug goes off the screen reset its position
  if (this.x > ctx.canvas.width) {
@@ -56,12 +62,15 @@ Enemy.prototype.update = function(dt) {
   player.lose();
  }
 };
-// Draw the enemy on the screen, required method for game
+/* Draw the enemy on the screen*/
 Enemy.prototype.render = function() {
  //20 offset is to pull the bug up into the block
  ctx.drawImage(Resources.get(this.sprite), this.x, this.y - 20);
 };
-//Check if the enemy has collided with the player
+/**
+* Check if the enemy has collided with the player
+* @param {Player} player - the player in the game
+*/
 Enemy.prototype.collide = function(player) {
 
  var xBetween = false;
@@ -95,7 +104,9 @@ Enemy.prototype.collide = function(player) {
   return false;
  }
 };
-//set the start location and speed
+/**
+* Set the start location and speed of the enemy
+*/
 Enemy.prototype.setLocationAndSpeed = function() {
  var randomNum = Math.random();
  var whichStoneRow = Math.floor(randomNum * (3)) + 1;
@@ -118,17 +129,15 @@ Enemy.prototype.setLocationAndSpeed = function() {
   this.speed = 300;
  }
 };
-//************************************
-//
-// End Enemy class
-//
-//************************************
+/**
+* End Enemy class
+*/
 
-//************************************
-//
-// Player class
-//
-//************************************
+/**
+* Player class
+* @constructor
+* @extends GameEntity
+*/
 var Player = function() {
  this.sprite = 'images/char-boy.png';
  this.setPositionFromXYBlock(2, 5);
@@ -137,30 +146,38 @@ var Player = function() {
  this.wins = 0;
  this.losses = 0;
 };
+//set up the inheritance for the Player class
 Player.prototype = Object.create(GameEntity.prototype);
 Player.constructor = Player;
-// This class requires an update(), render() and
-// a handleInput() method.
+
+/* Updates the player's position */
 Player.prototype.update = function(newX, newY) {
- //update x if the players horizontal move is within the left and right bounds
- //of the canvas
+ //update x if the players horizontal move is
+ //within the left and right bounds of the canvas
  if (newX >= 0 && this.getXBlock(newX) >= 0 && this.getXBlock(newX) < 5) {
   this.x = newX;
  }
- //update y if the players vertical movement is above the grass and below
- //the water
+ //update y if the players vertical movement
+ //is above the grass and below the water
  if (newY >= 0 && this.getYBlock(newY) > 0 && this.getYBlock(newY) < 6) {
   this.y = newY;
  }
 };
 
+/* Draws the player on the screen */
 Player.prototype.render = function() {
  //40 offset is to center the player in the block
  ctx.drawImage(Resources.get(this.sprite), this.x, this.y - 40);
 };
+/* Changes the player's position to the start position */
 Player.prototype.resetPosition = function() {
  this.setPositionFromXYBlock(2, 5);
 };
+
+/**
+* Compute the player's new position based on the player input
+* @param {string} input - The direction of the key pressed
+*/
 Player.prototype.handleInput = function(input) {
  var newX;
  var newY;
@@ -182,38 +199,37 @@ Player.prototype.handleInput = function(input) {
   this.win();
  }
 };
+/**
+* Update the player's score and reset the position
+*/
 Player.prototype.win = function() {
  this.wins++;
  document.getElementById("wins").innerHTML = this.wins;
  this.resetPosition();
 };
+/**
+* Update the player's score and reset the position
+*/
 Player.prototype.lose = function() {
  //reset the player
  this.losses++;
  document.getElementById("losses").innerHTML = this.losses;
  this.resetPosition();
 };
-//************************************
-//
-// End Player class
-//
-//************************************
+/**
+* End Player class
+*/
 
-//************************************
-//
-// Setup player and enemies
-//
-//************************************
+
+/** Setup player and enemies */
 var allEnemies = [new Enemy(), new Enemy(), new Enemy()];
 
-// Place the player object in a variable called player
+/** Place the player object in a variable called player */
 var player = new Player();
 
-//************************************
-//
-// Key listener
-//
-//************************************
+/**
+* Key listener
+*/
 document.addEventListener('keyup', function(e) {
  var allowedKeys = {
   37: 'left',

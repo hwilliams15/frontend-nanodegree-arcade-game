@@ -1,4 +1,4 @@
-#frontend-nanodegree-arcade-game
+# frontend-nanodegree-arcade-game
 
 Open index.html in your web browser to start the game.
 
@@ -6,7 +6,8 @@ Bugs will cross the screen at various speeds. The objective is to move the playe
 
 Your wins and losses are recorded as you play.
 
-##Player Controls
+## Player Controls
+
 Control | Description
 ------------ | -------------
 **Up** | Use the up arrow to move your player up towards the water.
