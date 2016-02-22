@@ -7,11 +7,6 @@ Bugs will cross the screen at various speeds. The objective is to move the playe
 Your wins and losses are recorded as you play.
 
 ##Player Controls
-- **Up** - Use the up arrow to move your player up towards the water.
-- **Down** - Use the down arrow to move your player down away from the water.
-- **Left** - Use the left arrow to move your player left.
-- **Right** - Use the right arrow to move your player right.
-
 Control | Description
 ------------ | -------------
 **Up** | Use the up arrow to move your player up towards the water.
